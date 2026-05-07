@@ -263,6 +263,43 @@ export default class SemanticTokensBuffer implements SyncItem {
     let { combinedModifiers } = this.config
     let combine = false
 
+    /* If it's got a modifier then we might want to do something different
+     * File, Global or Class Scope should result in a different highlight
+     * group for functions and variables.
+     * Static and Constant should also result in a different highlight
+     * group for variables.
+     */
+    const scopes = ['File', 'Global', 'Class']
+    let modifiers = ''
+
+    const addScopeModifiers = () => {
+      for (const scope of scopes) {
+        if (tokenModifiers.includes(`${scope.toLowerCase()}Scope`)) {
+          modifiers += scope
+        }
+      }
+    }
+
+    const lowerType = tokenType.toLowerCase()
+    if (lowerType === 'variable') {
+      addScopeModifiers()
+      if (tokenModifiers.includes('static')) modifiers += 'Static'
+      if (tokenModifiers.includes('readOnly')) modifiers += 'Constant'
+    } else if (lowerType === 'function') {
+      addScopeModifiers()
+    }
+
+    if (modifiers.length > 0) {
+      highlights.push({
+        range,
+        tokenType,
+        combine,
+        hlGroup: HLGROUP_PREFIX + 'Type' + modifiers + toHighlightPart(tokenType),
+        tokenModifiers,
+      })
+      return
+    }
+
     highlights.push({
       range,
       tokenType,
