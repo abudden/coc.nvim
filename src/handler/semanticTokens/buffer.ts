@@ -284,7 +284,7 @@ export default class SemanticTokensBuffer implements SyncItem {
     if (lowerType === 'variable') {
       addScopeModifiers()
       if (tokenModifiers.includes('static')) modifiers += 'Static'
-      if (tokenModifiers.includes('readOnly')) modifiers += 'Constant'
+      if (tokenModifiers.includes('readonly')) modifiers += 'Constant'
     } else if (lowerType === 'function') {
       addScopeModifiers()
     }
